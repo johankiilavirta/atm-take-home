@@ -9,7 +9,7 @@ class ATM:
     def withdraw(self, withdrawal_amount):
         self.available_cash -= withdrawal_amount
 
-    def can_deposit(self, deposit_amount):
+    def can_deposit(self, deposit_amount: int):
         return self.available_cash + deposit_amount <= self.max_bills
     
     def deposit(self, deposit_amount):

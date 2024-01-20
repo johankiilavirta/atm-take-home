@@ -14,16 +14,16 @@ class BankService:
         return True
 
     def create_account(self, bank_card: BankCard):
-        accounts = dict(("checking", 0), ("savings", 0))
-        bankAccounts[bank_card] = accounts
+        accounts = dict([("checking", 0), ("savings", 0)])
+        bankAccounts[hash(bank_card)] = accounts
 
         return True
 
     def get_account(self, bank_card : BankCard):
-        if bank_card not in bankAccounts:
+        if hash(bank_card) not in bankAccounts:
             self.create_account(bank_card)
 
-        return bankAccounts[bank_card]
+        return bankAccounts[hash(bank_card)]
 
     def has_sub_account(self, bank_card: BankCard, account_name: str):
         account = self.get_account(bank_card)
@@ -62,17 +62,19 @@ class BankService:
                    bank_card: BankCard, account_name : str) -> bool:
         account = self.get_account(bank_card)
         return account_name in account
-         
 
     def deposit(self, ATM : ATM, 
                 bank_card: BankCard, account_name : str, 
                 deposit_amount: int) -> bool:
-        if not ATM.can_deposit(ATM, bank_card, account_name) and \
-            self.can_deposit(ATM, bank_card, account_name):
+        
+        if not ATM.can_deposit(deposit_amount) or \
+            not self.can_deposit(ATM, bank_card, account_name):
             return False
         
+
         account = self.get_account(bank_card)
         account[account_name] += deposit_amount
+        ATM.deposit(deposit_amount)
         return True   
 
 

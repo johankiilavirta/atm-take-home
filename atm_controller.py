@@ -51,12 +51,13 @@ class ATM_Controller:
             raise Exception("Trying to select a saving/checking account at wrong stage")
         
         bank_card = self.session.get_bank_card()
+
         if self.bank_service.has_sub_account(bank_card, selected_account):
-            self.session.select_account(selected_account)
+            self.session.selected_account = selected_account
             self.session.state = "account-selected"
         else:
             self.session.select_account(None)
-    
+            
     def get_balance(self):
         if self.session.state != "account-selected":
             raise Exception("Trying to get balance when no account selected")
@@ -73,13 +74,13 @@ class ATM_Controller:
         selected_account = self.session.selected_account
         return self.bank_service.withdraw(self.ATM, bank_card, selected_account, withdrawal_amount)
     
-    def deposit(self, withdrawal_amount):
+    def deposit(self, deposit_amount):
         if self.session.state != "account-selected":
             raise Exception("Trying to deposit when no account selected")
         
         bank_card = self.session.get_bank_card()
         selected_account = self.session.selected_account
-        return self.bank_service.deposit(self.ATM, bank_card, selected_account, withdrawal_amount)
+        return self.bank_service.deposit(self.ATM, bank_card, selected_account, deposit_amount)
         
     def logout(self):
         self.session = Session("sign-in", None, None)
