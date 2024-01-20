@@ -62,6 +62,7 @@ class BankService:
         
         account = self.get_account(bank_card)
         account[account_name] -= withdrawal_amount
+        ATM.withdraw(withdrawal_amount)
         return True        
     
     

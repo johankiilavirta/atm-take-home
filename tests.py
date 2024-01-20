@@ -103,9 +103,32 @@ def different_users_depositing(controller: ATM_Controller):
 
     if controller.ATM.available_cash != 11 or controller.get_balance() != 1:
         raise Exception("Was not able to deposit successfully")
+    
+def valid_deposits_and_withdrawals(controller: ATM_Controller):
+    quick_initialization(controller, 6)
+    controller.deposit(5)
+    controller.withdraw(10) # Should not be able to withdraw 10 because not enough money in ATM
+    controller.deposit(50)
+    controller.withdraw(3)
+    controller.withdraw(7)
+    if controller.ATM.available_cash != 45 or controller.get_balance() != 45:
+        raise Exception("Was not able to deposit successfully")
+
+def test_machine_storage_cap(controller: ATM_Controller):
+    quick_initialization(controller, 7)
+    controller.deposit(10)
+    if controller.ATM.available_cash != 10 or controller.get_balance() != 10:
+        raise Exception("Was not able to deposit successfully")
+    
+    controller.deposit(1)
+    if controller.ATM.available_cash != 10 or controller.get_balance() != 10:
+        raise Exception("Deposited when should not have been able to deposit")
+
 
 make_valid_deposit(ATM_Controller(0, 100))
 make_repeated_deposits(ATM_Controller(0, 100))
 withdraw_from_empty_atm(ATM_Controller(0, 100))
 deposit_in_savings_and_checking(ATM_Controller(0, 100))
 different_users_depositing(ATM_Controller(0, 100))
+valid_deposits_and_withdrawals(ATM_Controller(0, 100))
+test_machine_storage_cap(ATM_Controller(0, 10))
