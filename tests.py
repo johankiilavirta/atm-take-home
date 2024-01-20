@@ -1,9 +1,10 @@
 import sys
 from atm_controller import ATM_Controller
-TEST_PIN_1 = "0000"
 
 class ATM_RESULT:
-    def __init__(self, state, current_cash, max_bills, checking_balance, savings_balance):
+    def __init__(self, card_number, pin, state, current_cash, max_bills, checking_balance, savings_balance):
+        self.card_number = card_number
+        self.pin = pin
         self.state = state
         self.current_cash = current_cash
         self.max_bills = max_bills
@@ -11,8 +12,7 @@ class ATM_RESULT:
         self.savings_balance = savings_balance
 
     def __str__(self) -> str:
-        return str((self.state, self.current_cash, "/", self.max_bills, "savings:", self.checking_balance, "checking:", self.savings_balance))
-
+        return str((self.card_number, self.pin, self.state, self.current_cash, "/", self.max_bills, "savings:", self.checking_balance, "checking:", self.savings_balance))
 
 def get_atm_status(controller: ATM_Controller):
     controller_account = controller.session.selected_account
@@ -23,6 +23,8 @@ def get_atm_status(controller: ATM_Controller):
     controller.session.selected_account = controller_account
 
     return ATM_RESULT(
+        controller.session.card_number,
+        controller.session.card_pin,
         controller.session.state,
         controller.ATM.available_cash, controller.ATM.max_bills,
         savings_balance, checking_balance
@@ -33,7 +35,7 @@ def print_atm_status(controller: ATM_Controller):
 
 def quick_initialization(controller: ATM_Controller, card_number):
     controller.insert_card(card_number)
-    controller.insert_pin("test_pin")
+    controller.insert_pin(0)
     controller.select_account("savings")
 
 def make_valid_deposit(controller: ATM_Controller):
@@ -62,18 +64,48 @@ def withdraw_from_empty_atm(controller : ATM_Controller):
         raise Exception("Was able to withdraw from empty ATM")
 
 def deposit_in_savings_and_checking(controller: ATM_Controller):
-    quick_initialization(controller, 2)
+    quick_initialization(controller, 3)
 
     controller.deposit(1)
 
     if controller.ATM.available_cash != 1 or controller.get_balance() != 1:
         raise Exception("Was not able to deposit successfully")
 
-    controller.select_account()
-    print_atm_status(controller)
+    controller.select_account("checking")
+    if controller.ATM.available_cash != 1 or controller.get_balance() != 0:
+        raise Exception("Was not able to deposit successfully")
+    
+    controller.deposit(50)
+    if controller.ATM.available_cash != 51 or controller.get_balance() != 50:
+        raise Exception("Was not able to deposit successfully")
+    
+    controller.select_account("savings")
+    if controller.ATM.available_cash != 51 or controller.get_balance() != 1:
+        raise Exception("Was not able to deposit successfully")
 
 
+
+def different_users_depositing(controller: ATM_Controller):
+    quick_initialization(controller, 4)
+
+    controller.deposit(1)
+
+    if controller.ATM.available_cash != 1 or controller.get_balance() != 1:
+        raise Exception("Was not able to deposit successfully")
+    
+    quick_initialization(controller, 5)
+
+    controller.deposit(10)
+    if controller.ATM.available_cash != 11 or controller.get_balance() != 10:
+        raise Exception("Was not able to deposit successfully")
+
+    quick_initialization(controller, 4)
+
+    if controller.ATM.available_cash != 11 or controller.get_balance() != 1:
+        raise Exception("Was not able to deposit successfully")
 
 make_valid_deposit(ATM_Controller(0, 100))
 make_repeated_deposits(ATM_Controller(0, 100))
 withdraw_from_empty_atm(ATM_Controller(0, 100))
+deposit_in_savings_and_checking(ATM_Controller(0, 100))
+different_users_depositing(ATM_Controller(0, 100))

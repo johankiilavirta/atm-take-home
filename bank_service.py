@@ -5,9 +5,15 @@ from atm import ATM
 bankAccounts = dict()
 
 class BankCard:
-    def __init__(self, card_number, card_pin):
+    def __init__(self, card_number: int, card_pin: int):
         self.card_number = card_number
         self.card_pin = card_pin
+
+    def __eq__(self, object: object) -> bool:
+        return isinstance(object, BankCard) and self.card_number == object.card_number and self.card_pin == object.card_pin
+    
+    def __hash__(self):
+        return hash((self.card_number, self.card_pin))
 
 class BankService:
     def card_is_verified(self, bank_card: BankCard) -> None:
@@ -15,15 +21,16 @@ class BankService:
 
     def create_account(self, bank_card: BankCard):
         accounts = dict([("checking", 0), ("savings", 0)])
-        bankAccounts[hash(bank_card)] = accounts
+        bankAccounts[bank_card] = accounts
 
         return True
 
     def get_account(self, bank_card : BankCard):
-        if hash(bank_card) not in bankAccounts:
+        if bank_card not in bankAccounts:
+            #print("creating new account for", bank_card.card_number, bank_card.card_pin)
             self.create_account(bank_card)
 
-        return bankAccounts[hash(bank_card)]
+        return bankAccounts[bank_card]
 
     def has_sub_account(self, bank_card: BankCard, account_name: str):
         account = self.get_account(bank_card)
