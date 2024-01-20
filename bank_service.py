@@ -6,9 +6,14 @@ from atm import ATM
 bankAccounts = dict()
 
 class BankService:
-    def accountExists(self, card_number : str, pin :str) -> None:
+    def cardIsVerified(self, card_number : str, pin :str) -> None:
         return True
-    
+
+    def createAccount(self, account_id: tuple(int, int)) -> bool:
+        accounts = dict(("checking", 0), ("savings", 0))
+        bankAccounts[account_id] = accounts
+
+        return True
 
     def getAccount(self, card_number : str, pin : str) -> None:
         account_id = (card_number, pin)
@@ -16,12 +21,10 @@ class BankService:
             self.createAccount(account_id)
 
         return bankAccounts[account_id]
-    
-    def createAccount(self, account_id: tuple(int, int)) -> bool:
-        accounts = dict(("checking", 0), ("savings", 0))
-        bankAccounts[account_id] = accounts
 
-        return True
+    def hasSubAccount(self, card_number, pin, account_name: str):
+        account = self.getAccount(card_number, pin)
+        return account_name in account
 
     def canWithdraw(self, ATM : ATM, 
                 account_id: tuple(int, int), account_name : str, 
