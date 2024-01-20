@@ -1,3 +1,5 @@
+# Basic ATM class, can be expanded in the future
+# the # of 1 dollar bills can not exceed max_bills which represents the physical storage of the ATM
 class ATM:
     def __init__(self, available_cash = 0, max_bills = 100):
         self.available_cash = available_cash

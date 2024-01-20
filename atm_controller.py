@@ -1,6 +1,7 @@
 from atm import ATM
 from bank_service import BankService, BankCard
 
+# Container for storing some state information
 class Session:
     def __init__(self, state, card_number, pin_number):
         self.state = state
@@ -8,22 +9,21 @@ class Session:
         self.card_pin = pin_number
         self.selected_account = None
 
-    def set_card_number(self, card_number):
-        self.card_number = card_number
-
-    def set_pin(self, card_pin):
-        self.card_pin = card_pin
-
     def select_account(self, selected_account):
         self.selected_account = selected_account
-
-    def is_signed_in(self):
-        return self.state == "signed-in" and \
-            self.card_number is not None and self.card_pin is not None
     
     def get_bank_card(self):
         return BankCard(self.card_number, self.card_pin)
 
+# Controller for the ATM. Errors if we try to transition from a state to another that is not possible
+# Directly communicates with the actual ATM and the BankService
+# Has states sign-in, waiting-for-pin, signed-in account-selected
+# which represent 
+#    1. waiting for a new card to be inserted, 
+#    2.the card is inserted and waiting for the pin
+#    3. the pin and card were validated and waiting to do something to the saving or checking account
+#    4. a saving/checking account was picked and a see balance/deposit/withdraw operation could be done
+    
 class ATM_Controller:
     def __init__(self, bills_in_atm : int, max_bills_in_atm : int):
         self.ATM = ATM(bills_in_atm, max_bills_in_atm)
@@ -53,7 +53,7 @@ class ATM_Controller:
         bank_card = self.session.get_bank_card()
 
         if self.bank_service.has_sub_account(bank_card, selected_account):
-            self.session.selected_account = selected_account
+            self.session.select_account(selected_account)
             self.session.state = "account-selected"
         else:
             self.session.select_account(None)
