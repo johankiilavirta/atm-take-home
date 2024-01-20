@@ -18,4 +18,4 @@ def withdraw_from_empty_atm(controller : ATM_Controller):
 results = []
 results.append(withdraw_from_empty_atm(ATM_Controller(0, 100)))
     
-
+print(results)

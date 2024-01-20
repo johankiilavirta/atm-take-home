@@ -1,35 +1,42 @@
 from atm import ATM
-
 """
     TODO: Need to query real data
 """
 bankAccounts = dict()
 
+class BankCard:
+    def __init__(self, card_number, card_pin):
+        self.card_number = card_number
+        self.card_pin = card_pin
+
 class BankService:
-    def cardIsVerified(self, card_number : str, pin :str) -> None:
+    def card_is_verified(self, bank_card: BankCard) -> None:
         return True
 
-    def createAccount(self, account_id: tuple(int, int)) -> bool:
+    def create_account(self, bank_card: BankCard):
         accounts = dict(("checking", 0), ("savings", 0))
-        bankAccounts[account_id] = accounts
+        bankAccounts[bank_card] = accounts
 
         return True
 
-    def getAccount(self, card_number : str, pin : str) -> None:
-        account_id = (card_number, pin)
-        if account_id not in bankAccounts:
-            self.createAccount(account_id)
+    def get_account(self, bank_card : BankCard):
+        if bank_card not in bankAccounts:
+            self.create_account(bank_card)
 
-        return bankAccounts[account_id]
+        return bankAccounts[bank_card]
 
-    def hasSubAccount(self, card_number, pin, account_name: str):
-        account = self.getAccount(card_number, pin)
+    def has_sub_account(self, bank_card: BankCard, account_name: str):
+        account = self.get_account(bank_card)
         return account_name in account
+    
+    def get_account_balance(self, bank_card: BankCard, account_name : str):
+        account = self.get_account(bank_card)
+        return account[account_name]
 
-    def canWithdraw(self, ATM : ATM, 
-                account_id: tuple(int, int), account_name : str, 
+    def can_withdraw(self, ATM : ATM, 
+                bank_card: BankCard, account_name : str, 
                 withdrawal_amount: int) -> bool:
-        account = self.getAccount(account_id)
+        account = self.get_account(bank_card)
         if account_name not in account:
             return False
         
@@ -38,34 +45,33 @@ class BankService:
             return True
     
         return False
-         
 
     def withdraw(self, ATM : ATM, 
-                 account_id: tuple(int, int), account_name : str, 
+                 bank_card: BankCard, account_name : str, 
                  withdrawal_amount: int) -> bool:
-        if not ATM.canWithdraw(withdrawal_amount) or \
-                not self.canWithdraw(ATM, account_id, account_name, withdrawal_amount):
+        if not ATM.can_withdraw(withdrawal_amount) or \
+                not self.can_withdraw(ATM, bank_card, account_name, withdrawal_amount):
             return False
         
-        account = self.getAccount(account_id)
+        account = self.get_account(bank_card)
         account[account_name] -= withdrawal_amount
         return True        
     
     
-    def canDeposit(self, ATM : ATM, 
-                   account_id: tuple(int, int), account_name : str) -> bool:
-        account = self.getAccount(account_id)
+    def can_deposit(self, ATM : ATM, 
+                   bank_card: BankCard, account_name : str) -> bool:
+        account = self.get_account(bank_card)
         return account_name in account
          
 
     def deposit(self, ATM : ATM, 
-                account_id: tuple(int, int), account_name : str, 
+                bank_card: BankCard, account_name : str, 
                 deposit_amount: int) -> bool:
-        if not ATM.canDeposit(ATM, account_id, account_name) and \
-            self.canDeposit(ATM, account_id, account_name):
+        if not ATM.can_deposit(ATM, bank_card, account_name) and \
+            self.can_deposit(ATM, bank_card, account_name):
             return False
         
-        account = self.getAccount(account_id)
+        account = self.get_account(bank_card)
         account[account_name] += deposit_amount
         return True   
 
